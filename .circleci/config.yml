@@ -10,54 +10,17 @@ jobs:
     machine: true
     steps:
       - run:
-          name: Kéo image Ubuntu Gnome VNC
-          command: |
-            sudo docker pull darkdragon001/ubuntu-gnome-vnc
-
-      - run:
-          name: Khởi động container Ubuntu Gnome VNC
+          name: Chạy container Ubuntu Gnome VNC
           command: |
             sudo docker run --name=ubuntu-gnome -d --rm \
               --tmpfs /run --tmpfs /run/lock --tmpfs /tmp \
               --cap-add SYS_BOOT --cap-add SYS_ADMIN \
               --cgroupns=host -v /sys/fs/cgroup:/sys/fs/cgroup \
-              -p 5901:5901 -p 6091:6091 \
+              -p 5901:5901 -p 6901:6901 \
               darkdragon001/ubuntu-gnome-vnc
-
-            echo "Đợi container Ubuntu-Gnome VNC khởi động..."
-            sleep 15  # Đợi container khởi động hoàn toàn
-
-            echo "Kiểm tra container có chạy đúng không..."
-            sudo docker ps
-
-            echo "Kiểm tra cổng 6091 có mở không..."
-            sudo ss -tulnp | grep 6091 || echo "LỖI: Cổng 6091 chưa mở!"
-
       - run:
-          name: Cài đặt và chạy Cloudflare Tunnel (Luôn chạy)
+          name: Cài đặt ngrok
           command: |
-            echo "Cài đặt Cloudflared..."
-            if ! command -v cloudflared &> /dev/null; then
-              npm install -g cloudflared
-            fi
-
-            echo "Chạy Cloudflare Tunnel qua cổng 6091..."
-            nohup cloudflared tunnel --url http://localhost:6091 > cloudflared.log 2>&1 &
-
-            echo "Đợi Cloudflare Tunnel khởi động..."
-            sleep 10  # Đợi thêm chút để chắc chắn có URL
-
-            echo "Cloudflare Tunnel đang chạy, lấy URL..."
-
-            # Kiểm tra và lấy URL từ log
-            TUNNEL_URL=$(grep -o 'https://.*\.trycloudflare.com' cloudflared.log | tail -n1)
-
-            if [[ -n "$TUNNEL_URL" ]]; then
-              echo "Cloudflare Tunnel URL: $TUNNEL_URL"
-            else
-              echo "LỖI: Không lấy được URL Cloudflare!"
-              cat cloudflared.log  # Hiển thị log để debug nếu lỗi
-            fi
-
-            # Giữ tiến trình chạy mãi mãi
-            tail -f /dev/null
+            npm install -g ngrok
+            ngrok config add-authtoken 2uARyZ1iAmLrdb1iXHkh5RQv7QG_3y6HxJYXJXdCDtTQvgu3c
+            ngrok http 9999
