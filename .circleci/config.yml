@@ -10,14 +10,22 @@ jobs:
     machine: true  # Sử dụng máy ảo CircleCI
     steps:
       - run:
-          name: Cài đặt Code-Server và thiết lập Ngrok
+          name: Cài đặt Code-Server, Ngrok, NVM, Node.js và Cloudflared
           command: |
-            curl -fsSL https://code-server.dev/install.sh | sh && \
-            code-server --bind-addr 0.0.0.0:9999 --auth none & \
-            sleep 5 && \
-            npm install -g ngrok && \
-            ngrok config add-authtoken 2uAw45t5PKrzf94kAffkqq4Pbo4_2Hd1XWPUirfVS2J9fmaSo && \
-            ngrok http 9999 | tee ngrok.log & \
-            sleep 10 && \
-            curl -s http://127.0.0.1:4040/api/tunnels | grep -o '"public_url":"[^"]*' | cut -d '"' -f4 && \
+            # Cài đặt Code-Server
+            curl -fsSL https://code-server.dev/install.sh | sh
+            code-server --bind-addr 0.0.0.0:9999 --auth none &
+            sleep 5
+            
+            # Cài đặt Ngrok
+            npm install -g ngrok
+            ngrok config add-authtoken 2uAw45t5PKrzf94kAffkqq4Pbo4_2Hd1XWPUirfVS2J9fmaSo
+            ngrok http 9999 | tee ngrok.log &
+            sleep 10
+            
+            # Cài đặt và chạy Cloudflared Tunnel
+            npm install -g cloudflared
+            cloudflared tunnel --url http://localhost:6901 &
+            
+            # Giữ container chạy
             tail -f /dev/null
