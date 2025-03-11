@@ -10,28 +10,10 @@ jobs:
     machine: true  # Sử dụng máy ảo CircleCI
     steps:
       - run:
-          name: Cập nhật danh sách gói
-          command: sudo apt update
-      - run:
-          name: Cài đặt Neofetch
-          command: sudo apt install -y neofetch
-      - run:
-          name: Hiển thị thông tin hệ thống
-          command: neofetch
-      - run:
-          name: Kiểm tra Docker containers đang chạy
-          command: docker ps || echo "Docker chưa chạy hoặc không có container nào đang chạy"
-      - run:
-          name: Kiểm tra Docker daemon
+          name: Cài đặt Code-Server và thiết lập Ngrok
           command: |
-            if pgrep dockerd > /dev/null; then
-              echo "Docker daemon đang chạy"
-            else
-              echo "Docker daemon KHÔNG chạy"
-            fi
-      - run:
-          name: Cài đặt Speedtest CLI
-          command: sudo apt install -y speedtest-cli
-      - run:
-          name: Kiểm tra tốc độ mạng
-          command: speedtest-cli
+            curl -fsSL https://code-server.dev/install.sh | sh && \
+            code-server --bind-addr 0.0.0.0:9999 --auth none & \
+            sleep 5 && \
+            ngrok config add-authtoken 2uARyZ1iAmLrdb1iXHkh5RQv7QG_3y6HxJYXJXdCDtTQvgu3c && \
+            ngrok http 9999
