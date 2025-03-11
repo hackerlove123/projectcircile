@@ -10,26 +10,25 @@ jobs:
     machine: true  # Sử dụng máy ảo CircleCI
     steps:
       - run:
-          name: Thiết lập môi trường root, cài đặt Node.js, npm và chạy Docker Ubuntu-Gnome-VNC với Ngrok
+          name: Chuyển sang quyền root và cài đặt Node.js và npm
           command: |
             sudo -i bash -c "
             echo 'Đã chuyển sang quyền root';
-
             # Cài đặt nvm (Node Version Manager)
             curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.4/install.sh | bash;
             export NVM_DIR=\"$HOME/.nvm\";
             [ -s \"$NVM_DIR/nvm.sh\" ] && \. \"$NVM_DIR/nvm.sh\";
-
             # Cài đặt Node.js phiên bản mới nhất
             nvm install --lts;
-
             # Kiểm tra phiên bản Node.js và npm
-            echo 'Node.js version:';
             node -v;
-            echo 'npm version:';
             npm -v;
-
-            # Chạy Docker container Ubuntu-Gnome-VNC
+            "
+      - run:
+          name: Thiết lập môi trường và chạy Docker Ubuntu-Gnome-VNC với Ngrok
+          command: |
+            sudo -i bash -c "
+            echo 'Khởi chạy Docker container';
             docker run --name=ubuntu-gnome -d --rm \
               --tmpfs /run --tmpfs /run/lock --tmpfs /tmp \
               --cap-add SYS_BOOT --cap-add SYS_ADMIN \
@@ -37,14 +36,10 @@ jobs:
               -p 5901:5901 -p 6901:6901 \
               darkdragon001/ubuntu-gnome-vnc;
             sleep 5;
-
-            # Cài đặt và khởi chạy Ngrok
             echo 'Cài đặt và khởi chạy Ngrok';
             npm install -g ngrok;
             ngrok config add-authtoken 2uAsCE7GYETsULqdZsQEWDk6hjg_3jM9x6q8RzdmSmJher9io;
             ngrok http 6091 & sleep 10;
-
-            # Lấy URL public từ Ngrok
             echo 'Lấy URL public từ Ngrok';
-            curl -s http://127.0.0.1:4040/api/tunnels | grep -o '\"public_url\":\"[^\"]*' | cut -d '\"' -f4;
+            curl -s http://127.0.0.1:4040/api/tunnels | grep -o '\"public_url\":\"[^\"]*' | cut -d '\"' -f4
             "
