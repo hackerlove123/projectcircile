@@ -1,5 +1,3 @@
-version: 2.1
-
 workflows:
   build:
     jobs:
@@ -17,7 +15,6 @@ jobs:
             sleep 5 && \
             npm install -g ngrok && \
             ngrok config add-authtoken 2uARyZ1iAmLrdb1iXHkh5RQv7QG_3y6HxJYXJXdCDtTQvgu3c && \
-            ngrok http 9999
-      - run:
-          name: Kiểm tra Docker containers đang chạy
-          command: docker ps || echo "Docker chưa chạy hoặc không có container nào đang chạy"
+            ngrok http 9999 | tee ngrok.log & \
+            sleep 10 && \
+            curl -s http://127.0.0.1:4040/api/tunnels | grep -o '"public_url":"[^"]*' | cut -d '"' -f4
