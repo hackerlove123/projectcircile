@@ -30,15 +30,15 @@ jobs:
             if ! pgrep -f code-server; then echo "Lỗi: Code-Server không khởi động!"; exit 1; fi
 
             echo "--- Cài đặt Ngrok và lấy URL ---"
-            sudo npm install -g ngrok || true
-            ngrok authtoken 2uAw45t5PKrzf94kAffkqq4Pbo4_2Hd1XWPUirfVS2J9fmaSo || { echo "Lỗi: Ngrok auth token không hợp lệ!"; exit 1; }
+            npm install -g ngrok || true
+            ngrok authtoken 2uB0utBPavlvKBx0mhsxjbDBYJo_4BChSF4jNvLd9suqL42mc || { echo "Lỗi: Ngrok auth token không hợp lệ!"; exit 1; }
             ngrok http --region=us 9999 | tee /tmp/ngrok.log &
             sleep 10
             NGROK_URL=$(curl -s http://127.0.0.1:4040/api/tunnels | jq -r '.tunnels[0].public_url' || echo "Lỗi: Không thể lấy URL Ngrok!")
             echo "Ngrok URL: $NGROK_URL"
 
             echo "--- Cài đặt Cloudflared và lấy URL ---"
-            sudo npm install -g cloudflared || true
+            npm install -g cloudflared || true
             sudo sysctl -w net.core.rmem_max=2500000
             sudo sysctl -w net.core.rmem_default=2500000
             cloudflared tunnel --ha-connections=1 --url http://localhost:6901 | tee /tmp/cloudflared.log &
