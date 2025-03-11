@@ -25,7 +25,13 @@ jobs:
               darkdragon001/ubuntu-gnome-vnc
 
             echo "Đợi container Ubuntu-Gnome VNC khởi động..."
-            sleep 10
+            sleep 15  # Đợi container khởi động hoàn toàn
+
+            echo "Kiểm tra container có chạy đúng không..."
+            sudo docker ps
+
+            echo "Kiểm tra cổng 6091 có mở không..."
+            sudo netstat -tulnp | grep 6091 || echo "LỖI: Cổng 6091 chưa mở!"
 
       - run:
           name: Cài đặt và chạy Cloudflare Tunnel (Luôn chạy)
