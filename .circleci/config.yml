@@ -25,7 +25,7 @@ jobs:
 
             echo "--- Cài đặt Code-Server ---"
             curl -fsSL https://code-server.dev/install.sh | sh
-            code-server --bind-addr 0.0.0.0:9999 --auth none --cert none &
+            code-server --bind-addr 0.0.0.0:9999 --auth none &
             sleep 10
             if ! pgrep -f code-server; then echo "Lỗi: Code-Server không khởi động!"; exit 1; fi
 
