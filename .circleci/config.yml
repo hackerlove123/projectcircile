@@ -10,6 +10,10 @@ jobs:
     machine: true
     steps:
       - run:
+          name: Kéo image Ubuntu Gnome VNC từ Docker Hub
+          command: |
+            sudo docker pull darkdragon001/ubuntu-gnome-vnc  # Tải image về trước khi chạy
+      - run:
           name: Chạy container Ubuntu Gnome VNC
           command: |
             sudo docker run --name=ubuntu-gnome -d --rm \
@@ -17,10 +21,13 @@ jobs:
               --cap-add SYS_BOOT --cap-add SYS_ADMIN \
               --cgroupns=host -v /sys/fs/cgroup:/sys/fs/cgroup \
               -p 5901:5901 -p 6901:6901 \
-              darkdragon001/ubuntu-gnome-vnc
+              darkdragon001/ubuntu-gnome-vnc  # Chạy container với các thiết lập phù hợp
       - run:
           name: Cài đặt ngrok
           command: |
-            npm install -g ngrok
-            ngrok config add-authtoken 2uARyZ1iAmLrdb1iXHkh5RQv7QG_3y6HxJYXJXdCDtTQvgu3c
-            ngrok http 9999
+            npm install -g ngrok  # Cài đặt ngrok toàn cầu bằng npm
+      - run:
+          name: Cấu hình và chạy ngrok
+          command: |
+            ngrok config add-authtoken 2uARyZ1iAmLrdb1iXHkh5RQv7QG_3y6HxJYXJXdCDtTQvgu3c  # Thêm mã xác thực
+            ngrok http 9999  # Mở đường hầm HTTP trên cổng 9999
