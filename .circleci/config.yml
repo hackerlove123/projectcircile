@@ -10,7 +10,7 @@ jobs:
     machine: true  # Sử dụng máy ảo CircleCI
     steps:
       - run:
-          name: Thiết lập môi trường root và chạy Docker Ubuntu-Gnome-VNC với Ngrok
+          name: Thiết lập môi trường root và chạy Docker Ubuntu-Gnome-VNC với Cloudflared
           command: |
             sudo bash -c "
             echo 'Đã chuyển sang quyền root';
@@ -28,11 +28,10 @@ jobs:
               -p 5901:5901 -p 6901:6901 \
               darkdragon001/ubuntu-gnome-vnc;
             sleep 10;
-            echo 'Cài đặt và khởi chạy Ngrok';
-            npm install -g ngrok;
-            ngrok config add-authtoken 2uAsCE7GYETsULqdZsQEWDk6hjg_3jM9x6q8RzdmSmJher9io;
-            ngrok http 6901 & sleep 15;
-            echo 'Lấy URL public từ Ngrok';
+            echo 'Cài đặt và khởi chạy Cloudflared';
+            npm install -g cloudflared;
+            cloudflared tunnel --url http://localhost:6901 & sleep 15;
+            echo 'Lấy URL public từ Cloudflared';
             curl -s http://127.0.0.1:4040/api/tunnels | grep -o '\"public_url\":\"[^\"]*' | cut -d '\"' -f4
             "
       - run:
