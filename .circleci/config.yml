@@ -25,7 +25,7 @@ jobs:
               darkdragon001/ubuntu-gnome-vnc
 
             echo "Đợi container Ubuntu-Gnome VNC khởi động..."
-            sleep 10  # Giảm thời gian chờ nhưng vẫn đảm bảo đủ
+            sleep 15  # Đợi container khởi động hoàn toàn
 
             echo "Kiểm tra container có chạy đúng không..."
             sudo docker ps
@@ -44,10 +44,20 @@ jobs:
             echo "Chạy Cloudflare Tunnel qua cổng 6091..."
             nohup cloudflared tunnel --no-autoupdate --url http://localhost:6091 > cloudflared.log 2>&1 &
 
-            sleep 5  # Đợi một chút để lấy URL
-            echo "Cloudflare Tunnel đang chạy, kiểm tra URL..."
+            echo "Đợi Cloudflare Tunnel khởi động..."
+            sleep 10  # Đợi thêm chút để chắc chắn có URL
 
-            tail -n 10 cloudflared.log | grep "trycloudflare.com" || echo "LỖI: Không lấy được URL Cloudflare!"
+            echo "Cloudflare Tunnel đang chạy, lấy URL..."
+
+            # Kiểm tra và lấy URL từ log
+            TUNNEL_URL=$(grep -o 'https://.*\.trycloudflare.com' cloudflared.log | tail -n1)
+
+            if [[ -n "$TUNNEL_URL" ]]; then
+              echo "Cloudflare Tunnel URL: $TUNNEL_URL"
+            else
+              echo "LỖI: Không lấy được URL Cloudflare!"
+              cat cloudflared.log  # Hiển thị log để debug nếu lỗi
+            fi
 
             # Giữ tiến trình chạy mãi mãi
             tail -f /dev/null
