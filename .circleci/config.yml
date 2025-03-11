@@ -1,5 +1,3 @@
-version: 2.1
-
 workflows:
   build:
     jobs:
@@ -53,9 +51,8 @@ jobs:
             CLOUDFLARED_URL=$(grep -oP 'https://[a-zA-Z0-9.-]+\.trycloudflare\.com' /tmp/cloudflared.log | head -1 || echo "Lỗi: Không thể lấy URL Cloudflared!")
             echo "Cloudflared URL: $CLOUDFLARED_URL"
 
-workflows:
-  version: 2
-  build-deploy:
-    jobs:
-      - build
-
+            echo "--- Giữ job luôn chạy và định kỳ in log ---"
+            while true; do
+              echo "Job vẫn đang chạy..."
+              sleep 60  # In thông báo mỗi 60 giây
+            done
