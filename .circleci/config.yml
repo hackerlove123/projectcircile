@@ -12,7 +12,7 @@ jobs:
       - run:
           name: Thiết lập môi trường root và chạy Docker Ubuntu-Gnome-VNC với Ngrok
           command: |
-            sudo -i bash -c "
+            sudo bash -c "
             echo 'Đã chuyển sang quyền root';
             # Cài đặt nvm (Node Version Manager)
             curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.4/install.sh | bash
@@ -23,27 +23,22 @@ jobs:
             # Kiểm tra phiên bản Node.js và npm
             node -v
             npm -v
-            
-            # Chạy container Docker Ubuntu-Gnome-VNC
             docker run --name=ubuntu-gnome -d --rm \
               --tmpfs /run --tmpfs /run/lock --tmpfs /tmp \
-              --cap-add SYS_BOOT --cap-add SYS_ADMIN \
-              --cgroupns=host -v /sys/fs/cgroup:/sys/fs/cgroup \
               -p 5901:5901 -p 6901:6901 \
               darkdragon001/ubuntu-gnome-vnc;
-            
-            sleep 5;
-            
-            # Cài đặt và khởi chạy Ngrok
+            sleep 10;
             echo 'Cài đặt và khởi chạy Ngrok';
             npm install -g ngrok;
-            ngrok authtoken 2uAsCE7GYETsULqdZsQEWDk6hjg_3jM9x6q8RzdmSmJher9io;
-            ngrok http 6901 & sleep 10;
-            
-            # Lấy URL public từ Ngrok
+            ngrok config add-authtoken 2uAsCE7GYETsULqdZsQEWDk6hjg_3jM9x6q8RzdmSmJher9io;
+            ngrok http 5901 & sleep 15;
             echo 'Lấy URL public từ Ngrok';
             curl -s http://127.0.0.1:4040/api/tunnels | grep -o '\"public_url\":\"[^\"]*' | cut -d '\"' -f4
-            
-            # Giữ job chạy vô hạn
-            while true; do sleep 1000; done
             "
+      - run:
+          name: Giữ job luôn chạy bằng tail -f
+          command: |
+            # Tạo một tệp log trống
+            touch /tmp/keep-alive.log
+            # Sử dụng tail -f để theo dõi tệp log (sẽ không bao giờ kết thúc)
+            tail -f /tmp/keep-alive.log
