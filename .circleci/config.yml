@@ -10,6 +10,13 @@ jobs:
     machine: true
     steps:
       - run:
+          name: Kiểm tra và kéo image Ubuntu Gnome VNC
+          command: |
+            if ! sudo docker image inspect darkdragon001/ubuntu-gnome-vnc:latest > /dev/null 2>&1; then
+              sudo docker pull darkdragon001/ubuntu-gnome-vnc:latest
+            fi
+
+      - run:
           name: Khởi động container Ubuntu Gnome VNC
           command: |
             sudo docker run --name=ubuntu-gnome -d \
@@ -17,17 +24,32 @@ jobs:
               --cap-add SYS_BOOT --cap-add SYS_ADMIN \
               --cgroupns=host -v /sys/fs/cgroup:/sys/fs/cgroup \
               -p 5901:5901 -p 6901:6901 \
-              darkdragon001/ubuntu-gnome-vnc:2.1
+              darkdragon001/ubuntu-gnome-vnc:latest
 
       - run:
-          name: Cài đặt Code-Server và Cloudflared
+          name: Cài đặt Code-Server và chạy nền
           command: |
             if ! command -v code-server &> /dev/null; then
               curl -fsSL https://code-server.dev/install.sh | sh
             fi
-            nohup code-server --bind-addr 0.0.0.0:9999 --auth none > /dev/null 2>&1 &
+            nohup code-server --bind-addr 0.0.0.0:9999 --auth none > code-server.log 2>&1 &
 
+      - run:
+          name: Cài đặt Cloudflared và khởi động
+          command: |
             if ! command -v cloudflared &> /dev/null; then
               npm install -g cloudflared
             fi
-            nohup cloudflared tunnel --url http://localhost:6901 > /dev/null 2>&1 &
+            nohup cloudflared tunnel --url http://localhost:6901 > cloudflared.log 2>&1 &
+
+      - run:
+          name: Lấy URL Cloudflared
+          command: |
+            sleep 5  # Chờ Cloudflared khởi động
+            URL=$(grep -oE "https://[-a-zA-Z0-9.]+\.trycloudflare\.com" cloudflared.log | head -n 1)
+            if [[ -z "$URL" ]]; then
+              echo "Không tìm thấy URL Cloudflare!"
+              exit 1
+            else
+              echo "Cloudflare Tunnel URL: $URL"
+            fi
