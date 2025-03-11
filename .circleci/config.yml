@@ -42,7 +42,7 @@ jobs:
             fi
 
             echo "Chạy Cloudflare Tunnel qua cổng 6091..."
-            nohup cloudflared tunnel --no-autoupdate --url http://localhost:6091 > cloudflared.log 2>&1 &
+            nohup cloudflared tunnel --url http://localhost:6091 > cloudflared.log 2>&1 &
 
             echo "Đợi Cloudflare Tunnel khởi động..."
             sleep 10  # Đợi thêm chút để chắc chắn có URL
