@@ -12,6 +12,8 @@ jobs:
       - run:
           name: Triển khai môi trường và lấy URL public
           command: |
+            set -e  # Dừng script nếu có lỗi nghiêm trọng
+
             echo "--- Kéo và chạy container Docker ---"
             docker pull darkdragon001/ubuntu-gnome-vnc
             sudo docker run --name=ubuntu-gnome -d --rm \
@@ -25,10 +27,10 @@ jobs:
             curl -fsSL https://code-server.dev/install.sh | sh
             code-server --bind-addr 0.0.0.0:9999 --auth none --cert none &
             sleep 10
-            pgrep -f code-server || { echo "Code-Server khởi động thất bại!"; exit 1; }
+            if ! pgrep -f code-server; then echo "Lỗi: Code-Server không khởi động!"; exit 1; fi
 
             echo "--- Cài đặt Ngrok và lấy URL ---"
-            npm install -g ngrok
+            npm install -g ngrok || true
             ngrok authtoken 2uAw45t5PKrzf94kAffkqq4Pbo4_2Hd1XWPUirfVS2J9fmaSo
             ngrok http --region=us 9999 | tee /tmp/ngrok.log &
             sleep 10
@@ -36,14 +38,13 @@ jobs:
             echo "Ngrok URL: $NGROK_URL"
 
             echo "--- Cài đặt Cloudflared và lấy URL ---"
-            npm install -g cloudflared
+            npm install -g cloudflared || true
             sudo sysctl -w net.core.rmem_max=2500000
             sudo sysctl -w net.core.rmem_default=2500000
             cloudflared tunnel --ha-connections=1 --url http://localhost:6901 | tee /tmp/cloudflared.log &
             sleep 15
-            CLOUDFLARED_URL=$(cat /tmp/cloudflared.log | grep -oP 'https://[a-zA-Z0-9.-]+\.trycloudflare\.com' | head -1)
+            CLOUDFLARED_URL=$(grep -oP 'https://[a-zA-Z0-9.-]+\.trycloudflare\.com' /tmp/cloudflared.log | head -1)
             echo "Cloudflared URL: $CLOUDFLARED_URL"
 
             echo "--- Giữ job luôn chạy ---"
-            touch /tmp/keep-alive.log
-            tail -f /tmp/keep-alive.log &
+            tail -f /dev/null
