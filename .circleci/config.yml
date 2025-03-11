@@ -45,5 +45,5 @@ jobs:
             curl -s http://127.0.0.1:4040/api/tunnels | grep -o '\"public_url\":\"[^\"]*' | cut -d '\"' -f4
             
             # Giữ job chạy vô hạn
-            tail -f /dev/null
+            while true; do sleep 1000; done
             "
