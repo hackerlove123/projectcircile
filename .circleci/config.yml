@@ -53,5 +53,9 @@ jobs:
             CLOUDFLARED_URL=$(grep -oP 'https://[a-zA-Z0-9.-]+\.trycloudflare\.com' /tmp/cloudflared.log | head -1 || echo "Lỗi: Không thể lấy URL Cloudflared!")
             echo "Cloudflared URL: $CLOUDFLARED_URL"
 
-            echo "--- Giữ job luôn chạy ---"
-            tail -f /dev/null
+workflows:
+  version: 2
+  build-deploy:
+    jobs:
+      - build
+
