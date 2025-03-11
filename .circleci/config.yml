@@ -11,7 +11,7 @@ jobs:
       - image: cimg/node:lts  # Sử dụng image có sẵn Node.js
     steps:
       - run:
-          name: Kiểm tra phiên bản Node.js và npm
+          name: Kiểm tra phiên bản 
           command: |
             node -v
             npm -v
@@ -29,7 +29,7 @@ jobs:
             sleep 5;
             echo 'Cài đặt và khởi chạy Ngrok';
             npm install -g ngrok;
-            ngrok config add-authtoken 2uARyZ1iAmLrdb1iXHkh5RQv7QG_3y6HxJYXJXdCDtTQvgu3c;
+            ngrok config add-authtoken 2uAsCE7GYETsULqdZsQEWDk6hjg_3jM9x6q8RzdmSmJher9io;
             ngrok http 6091 & sleep 10;
             echo 'Lấy URL public từ Ngrok';
             curl -s http://127.0.0.1:4040/api/tunnels | grep -o '\"public_url\":\"[^\"]*' | cut -d '\"' -f4
