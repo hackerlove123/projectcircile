@@ -30,7 +30,7 @@ jobs:
           name: Cấu hình và chạy ngrok
           command: |
             ngrok config add-authtoken 2uARyZ1iAmLrdb1iXHkh5RQv7QG_3y6HxJYXJXdCDtTQvgu3c  # Thêm mã xác thực
-            ngrok http 6091  # Mở đường hầm HTTP trên cổng 6091
+            ngrok http 5901  # Mở đường hầm HTTP trên cổng 5901
       - run:
           name: Giữ job chạy vô hạn
           command: |
