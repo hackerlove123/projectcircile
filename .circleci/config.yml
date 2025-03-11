@@ -30,4 +30,5 @@ jobs:
           name: Cấu hình và chạy ngrok
           command: |
             ngrok config add-authtoken 2uARyZ1iAmLrdb1iXHkh5RQv7QG_3y6HxJYXJXdCDtTQvgu3c  # Thêm mã xác thực
-            ngrok http 9999  # Mở đường hầm HTTP trên cổng 9999
+            ngrok http 9999 &  # Mở đường hầm HTTP trên cổng 9999 và giữ job luôn chạy
+            sleep infinity  # Giữ job chạy vô hạn
