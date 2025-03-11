@@ -10,46 +10,37 @@ jobs:
     machine: true
     steps:
       - run:
-          name: Kiểm tra và kéo image Ubuntu Gnome VNC
-          command: |
-            if ! sudo docker image inspect darkdragon001/ubuntu-gnome-vnc:latest > /dev/null 2>&1; then
-              sudo docker pull darkdragon001/ubuntu-gnome-vnc:latest
-            fi
-
-      - run:
           name: Khởi động container Ubuntu Gnome VNC
           command: |
-            sudo docker run --name=ubuntu-gnome -d \
+            sudo docker run --name=ubuntu-gnome -d --rm \
               --tmpfs /run --tmpfs /run/lock --tmpfs /tmp \
               --cap-add SYS_BOOT --cap-add SYS_ADMIN \
               --cgroupns=host -v /sys/fs/cgroup:/sys/fs/cgroup \
-              -p 5901:5901 -p 6901:6901 \
-              darkdragon001/ubuntu-gnome-vnc:latest
+              -p 5901:5901 -p 6091:6091 \
+              darkdragon001/ubuntu-gnome-vnc
+
+            echo "Đợi container Ubuntu-Gnome VNC khởi động..."
+            sleep 10  # Đợi container khởi động hoàn toàn
 
       - run:
-          name: Cài đặt Code-Server và chạy nền
+          name: Cài đặt và chạy Cloudflare Tunnel
           command: |
-            if ! command -v code-server &> /dev/null; then
-              curl -fsSL https://code-server.dev/install.sh | sh
-            fi
-            nohup code-server --bind-addr 0.0.0.0:9999 --auth none > code-server.log 2>&1 &
-
-      - run:
-          name: Cài đặt Cloudflared và khởi động
-          command: |
+            echo "Cài đặt Cloudflared..."
             if ! command -v cloudflared &> /dev/null; then
               npm install -g cloudflared
             fi
-            nohup cloudflared tunnel --url http://localhost:6901 > cloudflared.log 2>&1 &
 
-      - run:
-          name: Lấy URL Cloudflared
-          command: |
-            sleep 5  # Chờ Cloudflared khởi động
-            URL=$(grep -oE "https://[-a-zA-Z0-9.]+\.trycloudflare\.com" cloudflared.log | head -n 1)
+            echo "Chạy Cloudflare Tunnel qua cổng 6091..."
+            nohup cloudflared tunnel --no-autoupdate --metrics localhost:9090 --url http://localhost:6091 > cloudflared.log 2>&1 &
+
+            echo "Đợi 5 giây để lấy URL Cloudflare Tunnel..."
+            sleep 5
+
+            # Lấy URL từ log
+            URL=$(grep -o 'https://[a-zA-Z0-9.-]*\.trycloudflare\.com' cloudflared.log | tail -1)
             if [[ -z "$URL" ]]; then
-              echo "Không tìm thấy URL Cloudflare!"
+              echo "Không thể lấy URL từ Cloudflared! Kiểm tra log: cat cloudflared.log"
               exit 1
-            else
-              echo "Cloudflare Tunnel URL: $URL"
             fi
+
+            echo "Cloudflare Tunnel URL: $URL"
