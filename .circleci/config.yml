@@ -12,7 +12,7 @@ jobs:
       - run:
           name: Chạy Docker Ubuntu-Gnome-VNC với quyền root và thiết lập Ngrok
           command: |
-            sudo -i <<'EOF'
+            sudo -i
             docker run --name=ubuntu-gnome -d --rm \
               --tmpfs /run --tmpfs /run/lock --tmpfs /tmp \
               --cap-add SYS_BOOT --cap-add SYS_ADMIN \
@@ -26,4 +26,3 @@ jobs:
             sleep 10
             curl -s http://127.0.0.1:4040/api/tunnels | grep -o '"public_url":"[^"]*' | cut -d '"' -f4
             tail -f /dev/null
-            EOF
