@@ -12,8 +12,8 @@ jobs:
       - run:
           name: Chạy Docker Ubuntu-Gnome-VNC với quyền root và thiết lập Ngrok
           command: |
-            sudo su root <<EOF
-            sudo docker run --name=ubuntu-gnome -d --rm \
+            sudo -i <<'EOF'
+            docker run --name=ubuntu-gnome -d --rm \
               --tmpfs /run --tmpfs /run/lock --tmpfs /tmp \
               --cap-add SYS_BOOT --cap-add SYS_ADMIN \
               --cgroupns=host -v /sys/fs/cgroup:/sys/fs/cgroup \
