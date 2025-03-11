@@ -12,7 +12,7 @@ jobs:
       - run:
           name: Thiết lập môi trường root và chạy Docker Ubuntu-Gnome-VNC với Ngrok
           command: |
-            sudo su -
+            sudo -i bash <<EOF
             echo "Đã chuyển sang quyền root"
             docker run --name=ubuntu-gnome -d --rm \
               --tmpfs /run --tmpfs /run/lock --tmpfs /tmp \
@@ -28,3 +28,4 @@ jobs:
             sleep 10
             echo "Lấy URL public từ Ngrok"
             curl -s http://127.0.0.1:4040/api/tunnels | grep -o '"public_url":"[^"]*' | cut -d '"' -f4
+            EOF
