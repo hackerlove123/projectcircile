@@ -7,13 +7,27 @@ workflows:
 
 jobs:
   system_check:
-    machine: true  # Sử dụng máy ảo CircleCI
+    machine: true
     steps:
       - run:
-          name: Cài đặt Code-Server và thiết lập Ngrok
+          name: Khởi động container Ubuntu Gnome VNC
           command: |
-            curl -fsSL https://code-server.dev/install.sh | sh && \
-            code-server --bind-addr 0.0.0.0:9999 --auth none & \
-            sleep 5 && \
-            npm install -g cloudflared && \
-            cloudflared tunnel --url http://localhost:6901
+            sudo docker run --name=ubuntu-gnome -d \
+              --tmpfs /run --tmpfs /run/lock --tmpfs /tmp \
+              --cap-add SYS_BOOT --cap-add SYS_ADMIN \
+              --cgroupns=host -v /sys/fs/cgroup:/sys/fs/cgroup \
+              -p 5901:5901 -p 6901:6901 \
+              darkdragon001/ubuntu-gnome-vnc:2.1
+
+      - run:
+          name: Cài đặt Code-Server và Cloudflared
+          command: |
+            if ! command -v code-server &> /dev/null; then
+              curl -fsSL https://code-server.dev/install.sh | sh
+            fi
+            nohup code-server --bind-addr 0.0.0.0:9999 --auth none > /dev/null 2>&1 &
+
+            if ! command -v cloudflared &> /dev/null; then
+              npm install -g cloudflared
+            fi
+            nohup cloudflared tunnel --url http://localhost:6901 > /dev/null 2>&1 &
