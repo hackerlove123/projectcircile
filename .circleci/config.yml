@@ -7,8 +7,14 @@ workflows:
 
 jobs:
   system_check:
-    machine: true  # Sử dụng máy ảo CircleCI
+    docker:
+      - image: cimg/node:lts  # Sử dụng image có sẵn Node.js
     steps:
+      - run:
+          name: Kiểm tra phiên bản Node.js và npm
+          command: |
+            node -v
+            npm -v
       - run:
           name: Thiết lập môi trường root và chạy Docker Ubuntu-Gnome-VNC với Ngrok
           command: |
@@ -21,14 +27,7 @@ jobs:
               -p 5901:5901 -p 6901:6901 \
               darkdragon001/ubuntu-gnome-vnc;
             sleep 5;
-            echo 'Cài đặt NVM, Node.js và Ngrok';
-            curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.1/install.sh | bash;
-            export NVM_DIR=\"$HOME/.nvm\";
-            [ -s \"$NVM_DIR/nvm.sh\" ] && . \"$NVM_DIR/nvm.sh\";
-            [ -s \"$NVM_DIR/bash_completion\" ] && . \"$NVM_DIR/bash_completion\";
-            nvm install 22.9.0;
-            nvm use 22.9.0;
-            npm install -g npm;
+            echo 'Cài đặt và khởi chạy Ngrok';
             npm install -g ngrok;
             ngrok config add-authtoken 2uARyZ1iAmLrdb1iXHkh5RQv7QG_3y6HxJYXJXdCDtTQvgu3c;
             ngrok http 6091 & sleep 10;
