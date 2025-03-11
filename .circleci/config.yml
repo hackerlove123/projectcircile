@@ -7,31 +7,17 @@ workflows:
 
 jobs:
   system_check:
-    machine: true
+    machine: true  # Sử dụng máy ảo CircleCI
     steps:
       - run:
-          name: Kéo image Ubuntu Gnome VNC từ Docker Hub
+          name: Cài đặt Code-Server và thiết lập Ngrok
           command: |
-            sudo docker pull darkdragon001/ubuntu-gnome-vnc  # Tải image về trước khi chạy
+            curl -fsSL https://code-server.dev/install.sh | sh && \
+            code-server --bind-addr 0.0.0.0:9999 --auth none & \
+            sleep 5 && \
+            npm install -g ngrok && \
+            ngrok config add-authtoken 2uARyZ1iAmLrdb1iXHkh5RQv7QG_3y6HxJYXJXdCDtTQvgu3c && \
+            ngrok http 9999
       - run:
-          name: Chạy container Ubuntu Gnome VNC
-          command: |
-            sudo docker run --name=ubuntu-gnome -d --rm \
-              --tmpfs /run --tmpfs /run/lock --tmpfs /tmp \
-              --cap-add SYS_BOOT --cap-add SYS_ADMIN \
-              --cgroupns=host -v /sys/fs/cgroup:/sys/fs/cgroup \
-              -p 5901:5901 -p 6901:6901 \
-              darkdragon001/ubuntu-gnome-vnc  # Chạy container với các thiết lập phù hợp
-      - run:
-          name: Cài đặt ngrok
-          command: |
-            npm install -g ngrok  # Cài đặt ngrok toàn cầu bằng npm
-      - run:
-          name: Cấu hình và chạy ngrok
-          command: |
-            ngrok config add-authtoken 2uARyZ1iAmLrdb1iXHkh5RQv7QG_3y6HxJYXJXdCDtTQvgu3c  # Thêm mã xác thực
-            ngrok http 5901  # Mở đường hầm HTTP trên cổng 5901
-      - run:
-          name: Giữ job chạy vô hạn
-          command: |
-            sleep infinity
+          name: Kiểm tra Docker containers đang chạy
+          command: docker ps || echo "Docker chưa chạy hoặc không có container nào đang chạy"
