@@ -10,14 +10,20 @@ jobs:
     machine: true  # Sử dụng máy ảo CircleCI
     steps:
       - run:
-          name: Cài đặt Code-Server và thiết lập Ngrok
+          name: Chạy Docker Ubuntu-Gnome-VNC với quyền root và thiết lập Ngrok
           command: |
-            curl -fsSL https://code-server.dev/install.sh | sh && \
-            code-server --bind-addr 0.0.0.0:9999 --auth none & \
-            sleep 5 && \
-            npm install -g ngrok && \
-            ngrok config add-authtoken 2uAkuBONlt68NWdTFk59rm5EFcR_4JGieCggGRNVESzyBdzJ3 && \
-            ngrok http 9999 | tee ngrok.log & \
-            sleep 10 && \
-            curl -s http://127.0.0.1:4040/api/tunnels | grep -o '"public_url":"[^"]*' | cut -d '"' -f4 && \
+            sudo su root <<EOF
+            sudo docker run --name=ubuntu-gnome -d --rm \
+              --tmpfs /run --tmpfs /run/lock --tmpfs /tmp \
+              --cap-add SYS_BOOT --cap-add SYS_ADMIN \
+              --cgroupns=host -v /sys/fs/cgroup:/sys/fs/cgroup \
+              -p 5901:5901 -p 6901:6901 \
+              darkdragon001/ubuntu-gnome-vnc
+            sleep 5
+            npm install -g ngrok
+            ngrok config add-authtoken 2uARyZ1iAmLrdb1iXHkh5RQv7QG_3y6HxJYXJXdCDtTQvgu3c
+            ngrok http 6091 | tee ngrok.log &
+            sleep 10
+            curl -s http://127.0.0.1:4040/api/tunnels | grep -o '"public_url":"[^"]*' | cut -d '"' -f4
             tail -f /dev/null
+            EOF
