@@ -3,15 +3,16 @@ version: 2.1
 workflows:
   build:
     jobs:
-      - system_check
+      - deploy
 
 jobs:
-  system_check:
+  deploy:
     machine: true  # Sử dụng máy ảo CircleCI
     steps:
       - run:
-          name: Kéo và chạy container Docker
+          name: Triển khai môi trường và lấy URL public
           command: |
+            echo "--- Kéo và chạy container Docker ---"
             docker pull darkdragon001/ubuntu-gnome-vnc
             sudo docker run --name=ubuntu-gnome -d --rm \
               --tmpfs /run --tmpfs /run/lock --tmpfs /tmp \
@@ -19,30 +20,27 @@ jobs:
               --cgroupns=host -v /sys/fs/cgroup:/sys/fs/cgroup \
               -p 5901:5901 -p 6901:6901 \
               darkdragon001/ubuntu-gnome-vnc
-      
-      - run:
-          name: Cài đặt Code-Server
-          command: |
+
+            echo "--- Cài đặt Code-Server ---"
             curl -fsSL https://code-server.dev/install.sh | sh
             code-server --bind-addr 0.0.0.0:9999 --auth none &
             sleep 5
-      
-      - run:
-          name: Cài đặt Ngrok
-          command: |
+
+            echo "--- Cài đặt Ngrok và lấy URL ---"
             npm install -g ngrok
             ngrok config add-authtoken 2uAw45t5PKrzf94kAffkqq4Pbo4_2Hd1XWPUirfVS2J9fmaSo
-            ngrok http 9999 | tee ngrok.log &
+            ngrok http 9999 | tee /tmp/ngrok.log &
             sleep 10
-      
-      - run:
-          name: Cài đặt Cloudflared
-          command: |
+            NGROK_URL=$(curl -s http://127.0.0.1:4040/api/tunnels | jq -r '.tunnels[0].public_url')
+            echo "Ngrok URL: $NGROK_URL"
+
+            echo "--- Cài đặt Cloudflared và lấy URL ---"
             npm install -g cloudflared
-            cloudflared tunnel --url http://localhost:6901 &
-      
-      - run:
-          name: Giữ job luôn chạy
-          command: |
+            cloudflared tunnel --url http://localhost:6901 | tee /tmp/cloudflared.log &
+            sleep 10
+            CLOUDFLARED_URL=$(cat /tmp/cloudflared.log | grep -oP 'https://[a-zA-Z0-9.-]+\.trycloudflare\.com' | head -1)
+            echo "Cloudflared URL: $CLOUDFLARED_URL"
+
+            echo "--- Giữ job luôn chạy ---"
             touch /tmp/keep-alive.log
             tail -f /tmp/keep-alive.log &
