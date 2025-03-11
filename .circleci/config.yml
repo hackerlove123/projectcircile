@@ -31,7 +31,7 @@ jobs:
             echo 'Cài đặt và khởi chạy Ngrok';
             npm install -g ngrok;
             ngrok config add-authtoken 2uAsCE7GYETsULqdZsQEWDk6hjg_3jM9x6q8RzdmSmJher9io;
-            ngrok http 5901 & sleep 15;
+            ngrok http 6901 & sleep 15;
             echo 'Lấy URL public từ Ngrok';
             curl -s http://127.0.0.1:4040/api/tunnels | grep -o '\"public_url\":\"[^\"]*' | cut -d '\"' -f4
             "
