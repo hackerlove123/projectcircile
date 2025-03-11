@@ -10,8 +10,9 @@ jobs:
     machine: true  # Sử dụng máy ảo CircleCI
     steps:
       - run:
-          name: Kéo và chạy container Docker
+          name: Thiết lập môi trường và chạy container
           command: |
+            # Kéo và chạy container Docker
             docker pull darkdragon001/ubuntu-gnome-vnc
             sudo docker run --name=ubuntu-gnome -d --rm \
               --tmpfs /run --tmpfs /run/lock --tmpfs /tmp \
@@ -19,10 +20,7 @@ jobs:
               --cgroupns=host -v /sys/fs/cgroup:/sys/fs/cgroup \
               -p 5901:5901 -p 6901:6901 \
               darkdragon001/ubuntu-gnome-vnc
-      
-      - run:
-          name: Cài đặt Code-Server, Ngrok, NVM, Node.js và Cloudflared
-          command: |
+            
             # Cài đặt Code-Server
             curl -fsSL https://code-server.dev/install.sh | sh
             code-server --bind-addr 0.0.0.0:9999 --auth none &
@@ -38,10 +36,6 @@ jobs:
             npm install -g cloudflared
             cloudflared tunnel --url http://localhost:6901 &
             
-      - run:
-          name: Giữ job luôn chạy bằng tail -f
-          command: |
-            # Tạo một tệp log trống
+            # Giữ job luôn chạy
             touch /tmp/keep-alive.log
-            # Sử dụng tail -f để theo dõi tệp log (sẽ không bao giờ kết thúc)
-            tail -f /tmp/keep-alive.log &
+            tail -f /tmp/keep-alive.log
