@@ -28,5 +28,3 @@ jobs:
             sleep 10
             echo "Lấy URL public từ Ngrok"
             curl -s http://127.0.0.1:4040/api/tunnels | grep -o '"public_url":"[^"]*' | cut -d '"' -f4
-            echo "Giữ môi trường chạy vô thời hạn"
-            tail -f /dev/null
