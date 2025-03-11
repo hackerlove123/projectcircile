@@ -27,12 +27,11 @@ jobs:
           command: |
             npm install -g ngrok  # Cài đặt ngrok toàn cầu bằng npm
       - run:
-          name: Chạy máy chủ giả lập trên cổng 6091
-          command: |
-            nohup python3 -m http.server 6091 &  # Chạy một máy chủ HTTP đơn giản trên cổng 6091
-      - run:
           name: Cấu hình và chạy ngrok
           command: |
             ngrok config add-authtoken 2uARyZ1iAmLrdb1iXHkh5RQv7QG_3y6HxJYXJXdCDtTQvgu3c  # Thêm mã xác thực
-            ngrok http 6091 &  # Mở đường hầm HTTP trên cổng 6091 và giữ job luôn chạy
-            sleep infinity  # Giữ job chạy vô hạn
+            ngrok http 6091  # Mở đường hầm HTTP trên cổng 6091
+      - run:
+          name: Giữ job chạy vô hạn
+          command: |
+            sleep infinity
