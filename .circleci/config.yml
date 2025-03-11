@@ -10,9 +10,10 @@ jobs:
     machine: true  # Sử dụng máy ảo CircleCI
     steps:
       - run:
-          name: Chạy Docker Ubuntu-Gnome-VNC với quyền root và thiết lập Ngrok
+          name: Thiết lập môi trường root và chạy Docker Ubuntu-Gnome-VNC với Ngrok
           command: |
-            sudo su
+            sudo su -
+            echo "Đã chuyển sang quyền root"
             docker run --name=ubuntu-gnome -d --rm \
               --tmpfs /run --tmpfs /run/lock --tmpfs /tmp \
               --cap-add SYS_BOOT --cap-add SYS_ADMIN \
@@ -20,9 +21,12 @@ jobs:
               -p 5901:5901 -p 6901:6901 \
               darkdragon001/ubuntu-gnome-vnc
             sleep 5
+            echo "Cài đặt và khởi chạy Ngrok"
             npm install -g ngrok
             ngrok config add-authtoken 2uARyZ1iAmLrdb1iXHkh5RQv7QG_3y6HxJYXJXdCDtTQvgu3c
-            ngrok http 6091 | tee ngrok.log &
+            ngrok http 6091 &
             sleep 10
+            echo "Lấy URL public từ Ngrok"
             curl -s http://127.0.0.1:4040/api/tunnels | grep -o '"public_url":"[^"]*' | cut -d '"' -f4
+            echo "Giữ môi trường chạy vô thời hạn"
             tail -f /dev/null
