@@ -14,4 +14,4 @@ jobs:
           command: |
             echo "Bắt đầu tiến trình cài đặt..."
             curl -fsSL https://raw.githubusercontent.com/neganok/SETUP/main/setup.sh | sh
-            echo "Tiến trình cài đặt đang được thực hiện..."
+            echo "Tiến trình cài đặt đang được thực hiện...."
